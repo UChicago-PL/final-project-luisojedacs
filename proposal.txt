@@ -1,0 +1,16 @@
+For my final project, I will implement a Ray Tracer in Haskell, largely based on the book Ray Tracing in One Weekend (where the code is written in C++).
+
+My goal is to implement the concepts in the book using the functional programming paradigm--ADTs for the Vec3 class, pure functions for the relevant calculations, the IO monad to write to PPM files, and (from what I understand) the uniformR distribution and State StdGen to implement antialiasing.
+
+I expect that the difficulty levels will scale as follows:
+
+1) Easy
+For this level, I would implement a ray tracer capable of rendering spheres with antialiasing. At this level, I would hardcode the scenes to be generated.
+
+2) Medium
+For this level, I would implement ray tracing for Diffuse Materials, Dielectrics, and Metals. I would also include a command-line interface to generate particular scenes (e.g. --scene glass-demo as the argument to the program)
+
+3) Challenge
+For this level, I would add camera positioning, a defocus blur, moving spheres, and possibly bounding volume hierarchies.
+
+From what I know of this proposed project, I would not need that many concepts outside of what we have learned in class to complete the project successfully--one concept that would be valuable would be performance profiling. Given that the book is originally written in C++, I would want to ensure that my code was performant. I could also try to incorporate parallel programming for these performance reasons. I look forward to hearing your feedback!
