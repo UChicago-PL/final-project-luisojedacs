@@ -58,7 +58,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  Vec3, Color, Utils, Ray
 
     -- Modules included in this library but not exported.
     -- other-modules:
@@ -80,10 +80,9 @@ executable RayTracing
     import:           warnings
 
     -- .hs or .lhs file containing the Main module.
-    main-is:          Main.hs
+    main-is:          RayTracing.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -108,7 +107,7 @@ test-suite RayTracing-test
     default-language: Haskell2010
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules: Utils, Vec3, Color, Ray
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -120,7 +119,7 @@ test-suite RayTracing-test
     hs-source-dirs:   test
 
     -- The entrypoint to the test suite.
-    main-is:          Main.hs
+    main-is:          RayTracing.hs
 
     -- Test dependencies.
     build-depends:
