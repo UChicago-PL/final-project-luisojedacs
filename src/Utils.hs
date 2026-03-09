@@ -1,10 +1,18 @@
 module Utils where
-import Vec3 (Vec3(..), unitVector, scale, Point3, vecLengthSquared, dotProduct)
-import Color (Color)
+import Vec3 (Vec3(..), unitVector, Point3, vecLengthSquared, dotProduct)
 import Ray (Ray(..), at)
-import HittableList (HittableList (..))
-import Hittable (normal, Hittable (hit))
 import Interval (infinity, Interval (..))
+import System.Random ( Random(randomR), StdGen )
+
+-- use stdgen to take from std distro
+-- will need to pass in distro in main using getStdGen
+-- randomR to find random value in closed interval
+-- note--don't need doubleDegreesToRadians bc we already have Floating as the constraint in our impl
+randomDouble :: StdGen -> (Double, StdGen)
+randomDouble = randomR (0.0, 1.0)
+
+randomDoubleIntval :: Interval -> StdGen -> (Double, StdGen)
+randomDoubleIntval (Interval minB maxB) g = (minB + (maxB - minB) * fst (randomDouble g), snd (randomDouble g))
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend
@@ -48,12 +56,3 @@ shadeSphere r t = unitVector $ at r t - Vec3 0 0 (-1)
 
 degreesToRadians :: Floating a => a -> a
 degreesToRadians degrees = degrees * pi / 180
-
-rayColorT :: Ray -> Double
-rayColorT = hitSphere (Vec3 0 0 (-1)) 0.5
-
-rayColor :: Ray -> HittableList -> Color
-rayColor r world =
-      case hit world r (Interval 0 infinity) of 
-            Just rec -> scale (normal rec + Vec3 1 1 1) 0.5
-            Nothing -> scale (Vec3 1.0 1.0 1.0) (1 - alpha r) + scale (Vec3 0.5 0.7 1.0) (alpha r)

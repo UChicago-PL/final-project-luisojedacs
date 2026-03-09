@@ -20,6 +20,12 @@ size (Interval minB maxB) = maxB - minB
 surrounds :: Double -> Interval -> Bool
 surrounds val (Interval minB maxB) = minB < val && val < maxB
 
+clamp :: Double -> Interval -> Double
+clamp x (Interval minB maxB)
+    | x < minB = minB
+    | x > maxB = maxB
+    | otherwise = x
+
 empty :: Interval
 empty = Interval infinity (-infinity)
 
