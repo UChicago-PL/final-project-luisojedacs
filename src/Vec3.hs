@@ -7,6 +7,15 @@ data Vec3 = Vec3 { -- maybe change fields TODO
     e2 :: Double
 } deriving (Eq, Read) -- Maybe not ord--we will see
 
+getX :: Vec3 -> Double
+getX = e0
+
+getY :: Vec3 -> Double
+getY = e1
+
+getZ :: Vec3 -> Double
+getZ = e2
+
 instance Show Vec3 where -- may be useful for ppm
     show (Vec3 x y z) = show x ++ " " ++ show y ++ " " ++ show z
 
@@ -23,8 +32,11 @@ instance Num Vec3 where
     signum (Vec3 x0 x1 x2) = Vec3 (signum x0) (signum x1) (signum x2)
     fromInteger i = Vec3 (fromInteger i) (fromInteger i) (fromInteger i) -- just make it a vec with the same one
 
+mapVec :: (Double -> Double) -> Vec3 -> Vec3
+mapVec f (Vec3 x0 x1 x2) = Vec3 (f x0) (f x1) (f x2)
+
 scale :: Vec3 -> Double -> Vec3
-scale (Vec3 x0 x1 x2) t = Vec3 (t * x0) (t * x1) (t * x2)
+scale v t = mapVec (*t) v
 
 scaleDown :: Vec3 -> Double -> Vec3
 scaleDown v t = scale v (recip t)
