@@ -1,7 +1,10 @@
 module Utils where
-import Vec3 (Vec3(..), unitVector, scale, Point3, vecLengthSquared, dotProduct, getX, getY, getZ)
+import Vec3 (Vec3(..), unitVector, scale, Point3, vecLengthSquared, dotProduct)
 import Color (Color)
 import Ray (Ray(..), at)
+import HittableList (HittableList (..))
+import Hittable (normal, Hittable (hit))
+import Interval (infinity, Interval (..))
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend
@@ -43,14 +46,14 @@ alpha r = 0.5 * (e1 (unitDirection r) + 1.0)
 shadeSphere :: Ray -> Double -> Point3
 shadeSphere r t = unitVector $ at r t - Vec3 0 0 (-1)
 
+degreesToRadians :: Floating a => a -> a
+degreesToRadians degrees = degrees * pi / 180
+
 rayColorT :: Ray -> Double
 rayColorT = hitSphere (Vec3 0 0 (-1)) 0.5
 
-rayColor :: Ray -> Color
-rayColor r 
-    | rayColorT r > 0 = scale   
-                            (Vec3 (getX (shadeSphere r (rayColorT r)) + 1) 
-                                  (getY (shadeSphere r (rayColorT r)) + 1) 
-                                  (getZ (shadeSphere r (rayColorT r)) + 1)) 
-                            0.5
-    | otherwise = scale (Vec3 1.0 1.0 1.0) (1 - alpha r) + scale (Vec3 0.5 0.7 1.0) (alpha r)
+rayColor :: Ray -> HittableList -> Color
+rayColor r world =
+      case hit world r (Interval 0 infinity) of 
+            Just rec -> scale (normal rec + Vec3 1 1 1) 0.5
+            Nothing -> scale (Vec3 1.0 1.0 1.0) (1 - alpha r) + scale (Vec3 0.5 0.7 1.0) (alpha r)

@@ -7,15 +7,6 @@ data Vec3 = Vec3 { -- maybe change fields TODO
     e2 :: Double
 } deriving (Eq, Read) -- Maybe not ord--we will see
 
-getX :: Vec3 -> Double
-getX = e0
-
-getY :: Vec3 -> Double
-getY = e1
-
-getZ :: Vec3 -> Double
-getZ = e2
-
 instance Show Vec3 where -- may be useful for ppm
     show (Vec3 x y z) = show x ++ " " ++ show y ++ " " ++ show z
 

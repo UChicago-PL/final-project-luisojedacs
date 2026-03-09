@@ -6,6 +6,8 @@ import Color (colorString)
 import Ray (Ray(..))
 import Vec3 (Vec3(..), Point3, scaleDown, scale)
 import Utils (rayColor)
+import HittableList (HittableList(..))
+import Sphere (Sphere(..))
 
 aspectRatio :: Double
 aspectRatio = 16.0 / 9.0
@@ -51,6 +53,9 @@ viewportUpperLeft =  cameraCenter - Vec3 0 0 focalLength
 pixel00Loc :: Point3
 pixel00Loc = viewportUpperLeft + scale (pixelDeltaU + pixelDeltaV) 0.5
 
+currWorld :: HittableList
+currWorld = HittableList [Sphere (Vec3 0 0 (-1)) 0.5, Sphere (Vec3 0 (-100.5)(-1)) 100]
+
 main :: IO () -- PPM printing etc done in main since it's stateful, error logging, etc.
 main = do
   let w = imageWidth :: Int -- for convenience
@@ -64,6 +69,6 @@ main = do
                                    + scale pixelDeltaV (fromIntegral j)
           rayDirection = pixelCenter - cameraCenter -- not unit--faster code
           r = Ray cameraCenter rayDirection
-          pixelColor = rayColor r
+          pixelColor = rayColor r currWorld
       putStrLn $ colorString pixelColor
   hPutStr stderr "\rDone.                       \n"

@@ -2,6 +2,7 @@ module Sphere where
 import Hittable
 import Vec3
 import Ray (Ray(..), at)
+import Interval (contains, Interval)
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend
@@ -42,29 +43,25 @@ minusRoot c rad r = (hVar r c
 
 plusRoot :: Point3 -> Double -> Ray -> Double
 plusRoot c rad r = (hVar r c
-                - sqrt (discriminantCRadR c rad r)) 
+                + sqrt (discriminantCRadR c rad r)) 
                 / aVar r
 
---inclusive
-inBounds :: Double -> Double -> Double -> Bool
-inBounds val bMin bMax = bMin <= val && val <= bMax
-
-validRoot :: Sphere -> Ray -> Double -> Double -> Maybe Double
-validRoot (Sphere c rad) r tMin tMax
-    | inBounds (minusRoot c rad r) tMin tMax = Just $ minusRoot c rad r
-    | inBounds (plusRoot c rad r) tMin tMax = Just $ plusRoot c rad r
+validRoot :: Sphere -> Ray -> Interval -> Maybe Double
+validRoot (Sphere c rad) r intval
+    | contains (minusRoot c rad r) intval = Just $ minusRoot c rad r
+    | contains (plusRoot c rad r) intval= Just $ plusRoot c rad r
     | otherwise = Nothing
 
 normalVec :: Point3 -> Point3 -> Double -> Vec3
 normalVec p3 c = scaleDown (p3 - c)
 
 instance Hittable Sphere where
-    hit (Sphere c rad) r tMin tMax = 
+    hit (Sphere c rad) r intval = 
         if discriminantCRadR c rad r
             < 0 
             then Nothing
-        else fmap 
+        else fmap
                 (\root -> 
-                    hrFaceNormal (at r root) (normalVec (at r root) c rad) root
+                    hrFaceNormal (at r root) root r (normalVec (at r root) c rad)
                 )
-                (validRoot (Sphere c rad) r tMin tMax)
+                (validRoot (Sphere c rad) r intval)
