@@ -1,8 +1,8 @@
 module Interval where
 
 data Interval = Interval {
-    bMin :: Double,
-    bMax :: Double
+    bMin :: !Double,
+    bMax :: !Double
 }
 
 infinity :: Double

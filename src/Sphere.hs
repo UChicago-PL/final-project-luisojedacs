@@ -4,7 +4,7 @@ import Hittable
 import Vec3
 import Ray (Ray(..), at)
 import Interval (contains, Interval)
-import Utils (SomeMaterial, Material, HitRecord)
+import Utils (SomeMaterial, HitRecord)
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend
@@ -31,29 +31,28 @@ discriminantCRadR c rad r = discriminant (aVar r)
                                  (cVar (oToC r c) rad)
 
 data Sphere = Sphere {
-    center :: Point3,
-    radius :: Double,
-    material :: SomeMaterial
+    center :: !Point3,
+    radius :: !Double,
+    material :: !SomeMaterial
 }
 
 makeSphere :: Point3 -> Double -> SomeMaterial -> Sphere
 makeSphere c rad = Sphere c (max rad 0) 
 
-minusRoot :: Point3 -> Double -> Ray -> Double
-minusRoot c rad r = (hVar r c
-                - sqrt (discriminantCRadR c rad r)) 
-                / aVar r
-
-plusRoot :: Point3 -> Double -> Ray -> Double
-plusRoot c rad r = (hVar r c
-                + sqrt (discriminantCRadR c rad r)) 
-                / aVar r
-
 validRoot :: Sphere -> Ray -> Interval -> Maybe Double
-validRoot (Sphere c rad mat) r intval
-    | contains (minusRoot c rad r) intval = Just $ minusRoot c rad r
-    | contains (plusRoot c rad r) intval= Just $ plusRoot c rad r
+validRoot (Sphere c rad _) r intval
+    | contains minusR intval = Just $ minusR
+    | contains plusR intval= Just $ plusR
     | otherwise = Nothing
+    where
+        h = hVar r c
+        disc = discriminantCRadR c rad r
+        a = aVar r
+        plusR = (h + sqrt disc) / a
+        minusR = (h - sqrt disc) / a
+        
+
+
 
 normalVec :: Point3 -> Point3 -> Double -> Vec3
 normalVec p3 c = scaleDown (p3 - c)

@@ -2,16 +2,16 @@
 module Utils where
 import Vec3 (Vec3(..), unitVector, Point3, vecLengthSquared, dotProduct, scaleDown)
 import Ray (Ray(..), at)
-import Interval (infinity, Interval (..))
+import Interval (Interval (..))
 import System.Random ( Random(randomR), StdGen )
 import Color (Color)
 
-data HitRecord = HitRecord {
-    p :: Point3,
-    normal :: Vec3,
-    t :: Double,
-    frontFace :: Bool,
-    material :: SomeMaterial
+data HitRecord = HitRecord { -- strict fields
+    p :: !Point3,
+    normal :: !Vec3,
+    t :: !Double,
+    frontFace :: !Bool,
+    material :: !SomeMaterial
 }
 
 data SomeMaterial = forall a. Material a => SomeMaterial a
@@ -49,50 +49,19 @@ randomVecIntval g i = (Vec3 x y z, g3)
 randomUnitVec :: StdGen -> (Vec3, StdGen)
 randomUnitVec g
       --prevent a blow-up with sqrt 1e-160 in the divisor
-      | lenSq <= 1 && lenSq > 1e-160 = (scaleDown p (sqrt lenSq), g')
+      | lenSq <= 1 && lenSq > 1e-160 = (scaleDown pt (sqrt lenSq), g')
       --if conditions not met, 
       | otherwise = randomUnitVec g'
       where
-            (p, g') = randomVecIntval g (Interval (-1) 1)
-            lenSq = vecLengthSquared p
+            (pt, g') = randomVecIntval g (Interval (-1) 1)
+            lenSq = vecLengthSquared pt
 
 randomOnHemisphere :: StdGen -> Vec3 -> (Vec3, StdGen)
-randomOnHemisphere g normal
-      | dotProduct onUnit normal > 0 = (onUnit, g')
+randomOnHemisphere g n
+      | dotProduct onUnit n > 0 = (onUnit, g')
       | otherwise = (-onUnit, g')
       where
             (onUnit, g') = randomUnitVec g
-
---Sphere hit logic
---Derivation is in the book Ray Tracing in One Weekend
--- quadratic formula discriminant
-discriminant :: Double -> Double -> Double -> Double
-discriminant a h c = h * h - a * c
-
--- quadratic formula variables
-aVar :: Ray -> Double
-aVar r = vecLengthSquared (direction r)
-
-hVar :: Ray -> Point3 -> Double
-hVar r center = dotProduct (direction r) (oToC r center)
-
-cVar :: Vec3 -> Double -> Double
-cVar oc rad = vecLengthSquared oc - (rad * rad)
--- ray-origin-to-center-of-sphere vector
-oToC :: Ray -> Point3 -> Vec3
-oToC r center = center - origin r
-
-discriminantCRadR :: Point3 -> Double -> Ray -> Double
-discriminantCRadR center rad r = discriminant (aVar r) 
-                                 (hVar r center)
-                                 (cVar (oToC r center) rad)
-
-hitSphere :: Point3 -> Double -> Ray -> Double
-hitSphere center rad r =    if discriminantCRadR center rad r
-                                < 0 then -1
-                            else (hVar r center
-                                  - sqrt (discriminantCRadR center rad r)) 
-                                  / aVar r
 
 unitDirection :: Ray -> Vec3
 unitDirection = unitVector . direction
@@ -101,7 +70,7 @@ alpha :: Ray -> Double --for scaling blue/white based on y coord topdown--linear
 alpha r = 0.5 * (e1 (unitDirection r) + 1.0)
 
 shadeSphere :: Ray -> Double -> Point3
-shadeSphere r t = unitVector $ at r t - Vec3 0 0 (-1)
+shadeSphere r param = unitVector $ at r param - Vec3 0 0 (-1)
 
 degreesToRadians :: Floating a => a -> a
 degreesToRadians degrees = degrees * pi / 180

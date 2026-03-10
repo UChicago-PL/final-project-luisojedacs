@@ -3,9 +3,8 @@ import Ray
 import HittableList
 import Color
 import Hittable (Hittable(..))
-import Material
 import Interval (Interval(..), infinity)
-import Utils (alpha, randomDouble, randomOnHemisphere, randomUnitVec, SomeMaterial (..), HitRecord (..), Material (..))
+import Utils (alpha, randomDouble, SomeMaterial (..), HitRecord (..), Material (..))
 import Vec3 (Vec3(..), scale, Point3, scaleDown)
 import Control.Monad (forM_)
 import GHC.IO.Handle (hPutStr, hFlush)
@@ -114,9 +113,5 @@ render cam world = do
   where
     iw   = imageWidth cam
     ih   = imageHeight cam
-    p00 = pixel00Loc cam
-    pdU  = pixelDeltaU cam
-    pdV  = pixelDeltaV cam
-    cameraCenter  = center cam
     sampPerPixel = samplesPerPixel cam
     maxD = maxDepth cam

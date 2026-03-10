@@ -1,10 +1,8 @@
 {-# LANGUAGE ExistentialQuantification #-} -- for existential wrapper (instead of shared ptr)
-{-# LANGUAGE InstanceSigs #-}
 module Material where
-import System.Random (StdGen)
 import Ray (Ray (..))
 import Color (Color)
-import Vec3 (Point3, Vec3 (..), nearZero, reflect, unitVector, scale, dotProduct, refract)
+import Vec3 (Vec3 (..), nearZero, reflect, unitVector, scale, dotProduct, refract)
 import Utils (randomUnitVec, Material (scatter), HitRecord (..), randomDouble)
 
 newtype Dielectric = Dielectric {
@@ -43,7 +41,7 @@ getFuzz m
     | otherwise = 1
 
 instance Material Metal where
-    scatter g rIn hr metal 
+    scatter g rIn hr metal
         | dotProduct (direction scattered) (normal hr) > 0 = Just (attenuation, scattered, g1)
         | otherwise = Nothing
         where
@@ -59,7 +57,7 @@ newtype Lambertian = Lambertian {
 }
 
 instance Material Lambertian where
-    scatter g r hr lamb
+    scatter g _ hr lamb
         | nearZero scatterDir = Just (attenuation, scatteredNz, g')
         | otherwise = Just (attenuation, scattered, g')
         where

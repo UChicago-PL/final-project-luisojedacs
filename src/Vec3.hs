@@ -5,7 +5,7 @@ data Vec3 = Vec3 { -- optimize with strict fields
     e0 :: !Double,
     e1 :: !Double,
     e2 :: !Double
-} deriving (Eq, Read) -- Maybe not ord--we will see
+} deriving (Eq, Read)
 
 instance Show Vec3 where -- may be useful for ppm
     show (Vec3 x y z) = show x ++ " " ++ show y ++ " " ++ show z
@@ -39,12 +39,14 @@ nearZero (Vec3 x0 x1 x2) = abs x0 < 1e-8 && abs x1 < 1e-8 && abs x2 < 1e-8
 mapVec :: (Double -> Double) -> Vec3 -> Vec3
 mapVec f (Vec3 x0 x1 x2) = Vec3 (f x0) (f x1) (f x2)
 
+{-# INLINE scale #-}
 scale :: Vec3 -> Double -> Vec3
 scale v t = mapVec (*t) v
 
 scaleDown :: Vec3 -> Double -> Vec3
 scaleDown v t = scale v (recip t)
 
+{-# INLINE dotProduct #-}
 dotProduct :: Vec3 -> Vec3 -> Double
 dotProduct (Vec3 x0 x1 x2) (Vec3 y0 y1 y2) = (x0 * y0) + (x1 * y1) + (x2 * y2)
 
@@ -53,9 +55,11 @@ cross (Vec3 x0 x1 x2) (Vec3 y0 y1 y2) = Vec3 (x1 * y2 - x2 * y1)
                                              (x2 * y0 - x0 * y2)
                                              (x0 * y1 - x1 * y0)
 
+{-# INLINE unitVector #-}
 unitVector :: Vec3 -> Vec3
 unitVector v = scaleDown v (vecLength v)
 
+{-# INLINE vecLengthSquared #-}
 vecLengthSquared :: Vec3 -> Double
 vecLengthSquared (Vec3 x y z) = (x * x) + (y * y) + (z * z)
 
