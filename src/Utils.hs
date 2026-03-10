@@ -1,5 +1,5 @@
 module Utils where
-import Vec3 (Vec3(..), unitVector, Point3, vecLengthSquared, dotProduct)
+import Vec3 (Vec3(..), unitVector, Point3, vecLengthSquared, dotProduct, scaleDown)
 import Ray (Ray(..), at)
 import Interval (infinity, Interval (..))
 import System.Random ( Random(randomR), StdGen )
@@ -11,8 +11,40 @@ import System.Random ( Random(randomR), StdGen )
 randomDouble :: StdGen -> (Double, StdGen)
 randomDouble = randomR (0.0, 1.0)
 
-randomDoubleIntval :: Interval -> StdGen -> (Double, StdGen)
-randomDoubleIntval (Interval minB maxB) g = (minB + (maxB - minB) * fst (randomDouble g), snd (randomDouble g))
+randomDoubleIntval :: StdGen -> Interval -> (Double, StdGen)
+randomDoubleIntval g (Interval minB maxB) = (minB + (maxB - minB) * fst (randomDouble g), snd (randomDouble g))
+
+--TODO--figure out how to get these in vec
+randomVec :: StdGen -> (Vec3, StdGen)
+randomVec g = (Vec3 x y z, g3)
+    where
+        (x, g1) = randomDouble g
+        (y, g2) = randomDouble g1
+        (z, g3) = randomDouble g2
+
+randomVecIntval :: StdGen -> Interval -> (Vec3, StdGen)
+randomVecIntval g i = (unitVector (Vec3 x y z), g3)
+    where
+        (x, g1) = randomDoubleIntval g i
+        (y, g2) = randomDoubleIntval g1 i
+        (z, g3) = randomDoubleIntval g2 i
+
+randomUnitVector :: StdGen -> (Vec3, StdGen)
+randomUnitVector g
+      --prevent a blow-up with sqrt 1e-160 in the divisor
+      | lenSq <= 1 && lenSq > 1e-160 = (scaleDown p (sqrt lenSq), g')
+      --if conditions not met, 
+      | otherwise = randomUnitVector g'
+      where
+            (p, g') = randomVecIntval g (Interval (-1) 1)
+            lenSq = vecLengthSquared p
+
+randomOnHemisphere :: StdGen -> Vec3 -> (Vec3, StdGen)
+randomOnHemisphere g normal
+      | dotProduct onUnit normal > 0 = (onUnit, g')
+      | otherwise = (-onUnit, g')
+      where
+            (onUnit, g') = randomVec g
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend

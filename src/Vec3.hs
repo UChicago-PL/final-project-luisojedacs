@@ -10,7 +10,7 @@ data Vec3 = Vec3 { -- maybe change fields TODO
 instance Show Vec3 where -- may be useful for ppm
     show (Vec3 x y z) = show x ++ " " ++ show y ++ " " ++ show z
 
--- should have getE0, getE1, getE2 out of the box--using records for convenience
+-- should have e0, e1, e2 as fns out of the box--using records for convenience
 
 -- Haskell is highly convenient in this regard--strong typing system etc. means
 -- that we have a natural way of adding the properties we want through the typeclass
