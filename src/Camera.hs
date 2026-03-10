@@ -2,9 +2,10 @@ module Camera where
 import Ray
 import HittableList
 import Color
-import Hittable (Hittable(..), HitRecord (..))
+import Hittable (Hittable(..))
+import Material
 import Interval (Interval(..), infinity)
-import Utils (alpha, randomDouble, randomOnHemisphere)
+import Utils (alpha, randomDouble, randomOnHemisphere, randomUnitVec, SomeMaterial (..), HitRecord (..), Material (..))
 import Vec3 (Vec3(..), scale, Point3, scaleDown)
 import Control.Monad (forM_)
 import GHC.IO.Handle (hPutStr, hFlush)
@@ -23,17 +24,20 @@ data Camera = Camera {
     pixelDeltaV   :: Vec3,
     pixel00Loc    :: Point3,
     samplesPerPixel :: Int,
-    pixelSamplesScale :: Double
+    pixelSamplesScale :: Double,
+    maxDepth :: Int
 }
 
-rayColor :: StdGen -> Ray -> HittableList -> (Color, StdGen)
-rayColor g r world =
-      case hit world r (Interval 0 infinity) of
-            Just rec -> 
-                let (dir, g') = randomOnHemisphere g (normal rec)
-                    newRay = Ray (p rec) dir
-                    (bounceColor, g'') = rayColor g' newRay world
-                in (scale bounceColor 0.5, g'')
+rayColor :: StdGen -> Ray -> Int -> HittableList -> (Color, StdGen)
+rayColor g _ 0 _ = (Vec3 0 0 0, g)
+rayColor g r maxD world =
+      case hit world r (Interval 0.001 infinity) of
+            Just hr -> case material hr of --if there is a material
+                SomeMaterial mat -> case scatter g r hr mat of
+                    Just (attenuation, scattered, g1) ->
+                        let (bounceColor, g2) = rayColor g1 scattered (maxD - 1) world
+                        in (attenuation * bounceColor, g2)
+                    Nothing -> (Vec3 0 0 0, g)
             Nothing -> 
                 (scale (Vec3 1.0 1.0 1.0) (1 - alpha r) + scale (Vec3 0.5 0.7 1.0) (alpha r), g)
 
@@ -48,7 +52,8 @@ initializeCamera ar iw samps = Camera
         pixelDeltaV   = pdv,
         pixel00Loc    = viewportUpperLeft + scale (pdu + pdv) 0.5,
         samplesPerPixel = samps,
-        pixelSamplesScale = 1.0 / fromIntegral samps
+        pixelSamplesScale = 1.0 / fromIntegral samps,
+        maxDepth = maxD
     }
     where
         ih = max (truncate (fromIntegral iw / ar)) 1
@@ -64,6 +69,7 @@ initializeCamera ar iw samps = Camera
                             - Vec3 0 0 focalLength
                             - scaleDown viewportU 2
                             - scaleDown viewportV 2
+        maxD = 50
 
 sampleSquare :: StdGen -> (Vec3, StdGen)
 sampleSquare g = (Vec3 (x - 0.5) (y - 0.5) 0, g2)
@@ -97,7 +103,7 @@ render cam world = do
         --like fold and map combined--collect outputs while still passing g'
         let (gFinal, colors) = mapAccumL (\g' _ -> 
                 let (r, gNew) = getRay g' cam i j 
-                in (gNew, rayColor g r world)
+                in (gNew, rayColor gNew r maxD world)
                 ) 
                 g [0 .. sampPerPixel - 1]
         writeIORef gRef gFinal
@@ -113,3 +119,4 @@ render cam world = do
     pdV  = pixelDeltaV cam
     cameraCenter  = center cam
     sampPerPixel = samplesPerPixel cam
+    maxD = maxDepth cam

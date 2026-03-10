@@ -1,10 +1,10 @@
 module Vec3 where -- change this later
 
 --Module for the Vec3 class
-data Vec3 = Vec3 { -- maybe change fields TODO
-    e0 :: Double,
-    e1 :: Double,
-    e2 :: Double
+data Vec3 = Vec3 { -- optimize with strict fields
+    e0 :: !Double,
+    e1 :: !Double,
+    e2 :: !Double
 } deriving (Eq, Read) -- Maybe not ord--we will see
 
 instance Show Vec3 where -- may be useful for ppm
@@ -22,6 +22,19 @@ instance Num Vec3 where
     abs (Vec3 x0 x1 x2) = Vec3 (abs x0) (abs x1) (abs x2)
     signum (Vec3 x0 x1 x2) = Vec3 (signum x0) (signum x1) (signum x2)
     fromInteger i = Vec3 (fromInteger i) (fromInteger i) (fromInteger i) -- just make it a vec with the same one
+
+refract :: Vec3 -> Vec3 -> Double -> Vec3
+refract uv n etaiOverEtat = rOutPerp + rOutPar
+    where
+        cosTheta = min (dotProduct (-uv) n) 1
+        rOutPerp = scale (uv + scale n cosTheta) etaiOverEtat
+        rOutPar = scale n (-(sqrt (1 - vecLengthSquared rOutPerp)))
+
+reflect :: Vec3 -> Vec3 -> Vec3
+reflect v n = v - scale n (2 * dotProduct v n)
+
+nearZero :: Vec3 -> Bool
+nearZero (Vec3 x0 x1 x2) = abs x0 < 1e-8 && abs x1 < 1e-8 && abs x2 < 1e-8
 
 mapVec :: (Double -> Double) -> Vec3 -> Vec3
 mapVec f (Vec3 x0 x1 x2) = Vec3 (f x0) (f x1) (f x2)

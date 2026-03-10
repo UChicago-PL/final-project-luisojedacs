@@ -4,6 +4,7 @@ import Hittable
 import Sphere ( Sphere )
 import Data.Foldable (foldl')
 import Interval (Interval(..))
+import Utils ( HitRecord(t) )
 
 newtype HittableList = HittableList [Sphere]
 
