@@ -1,4 +1,6 @@
 module Main where
+-- Module to create scenes, put everything together --
+
 import Vec3 (Vec3(..))
 import HittableList (HittableList(..))
 import Material
@@ -24,6 +26,7 @@ lookupScene "glass-demo" = Just glassScene
 lookupScene "metals"     = Just metalsScene
 lookupScene _            = Nothing
 
+-- Scene definitions --
 demoScene :: Scene
 demoScene = Scene cam world
   where
@@ -61,6 +64,9 @@ metalsScene = Scene cam world
         Sphere (Vec3 (-1.2) 0 (-1))   0.5    (SomeMaterial (Metal (Vec3 0.8 0.4 0.2) 0.3)),
         Sphere (Vec3 1.2 0 (-1))      0.5    (SomeMaterial (Metal (Vec3 0.2 0.4 0.8) 0.8))
       ]
+
+
+-- Define materials for different spheres --
 materialGround :: SomeMaterial
 materialGround = SomeMaterial (Lambertian (Vec3 0.8 0.8 0.0))
 
@@ -76,6 +82,7 @@ materialBubble = SomeMaterial (Dielectric (1 / 1.50))
 materialRight :: SomeMaterial
 materialRight = SomeMaterial (Metal (Vec3 0.8 0.6 0.2) 1)
 
+-- Define the world --
 currWorld :: HittableList
 currWorld = HittableList 
   [
@@ -86,9 +93,11 @@ currWorld = HittableList
     Sphere (Vec3 1 0 (-1)) 0.5  materialRight
   ]
 
+-- Initialize the camera --
 currCamera :: Camera
 currCamera = initializeCamera (16.0 / 9.0) 1600 400
 
+-- Main function --
 main :: IO ()
 main = do
     args <- getArgs

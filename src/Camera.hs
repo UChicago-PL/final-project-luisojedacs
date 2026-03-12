@@ -1,4 +1,6 @@
 module Camera where
+-- Module where the Camera datatype and associated helpers are defined --
+
 import Ray
 import HittableList
 import Color
@@ -14,6 +16,7 @@ import Data.Foldable (foldl')
 import Data.List (mapAccumL)
 import Data.IORef (readIORef, newIORef, writeIORef)
 
+-- Define the camera datatype
 data Camera = Camera {
     aspectRatio   :: Double,
     imageWidth    :: Int,
@@ -27,6 +30,11 @@ data Camera = Camera {
     maxDepth :: Int
 }
 
+-- Function that generates a color for a ray's intersection with whichever is the closest
+-- object (as determined by hit applied to the HittableList type).
+-- input: StdGen, the ray in question, the maximum depth of the camera, and the world being
+-- raytraced
+-- returns the Color and the new StdGen 
 rayColor :: StdGen -> Ray -> Int -> HittableList -> (Color, StdGen)
 rayColor g _ 0 _ = (Vec3 0 0 0, g)
 rayColor g r maxD world =
@@ -40,6 +48,7 @@ rayColor g r maxD world =
             Nothing -> 
                 (scale (Vec3 1.0 1.0 1.0) (1 - alpha r) + scale (Vec3 0.5 0.7 1.0) (alpha r), g)
 
+-- Initializes a camera based on aspect ratio, image width, and samples per pixel
 initializeCamera :: Double -> Int -> Int -> Camera
 initializeCamera ar iw samps = Camera
     {
@@ -70,12 +79,14 @@ initializeCamera ar iw samps = Camera
                             - scaleDown viewportV 2
         maxD = 50
 
+-- Returns a randomly sampled pixel vector
 sampleSquare :: StdGen -> (Vec3, StdGen)
 sampleSquare g = (Vec3 (x - 0.5) (y - 0.5) 0, g2)
     where
         (x, g1) = randomDouble g
         (y, g2) = randomDouble g1
 
+-- Returns a ray aimed from the camera at the sampled pixel
 getRay :: StdGen -> Camera -> Int -> Int -> (Ray, StdGen)
 getRay g cam i j = (Ray rayOrigin rayDirection, gNew)
     where
@@ -87,6 +98,8 @@ getRay g cam i j = (Ray rayOrigin rayDirection, gNew)
         rayOrigin = center cam
         rayDirection = pixelSample - rayOrigin
 
+-- Renders the world with Camera and World as input, the IO () as output for when main calls
+-- this function.
 render :: Camera -> HittableList -> IO ()
 render cam world = do
   putStr $ "P3\n" ++ show iw ++ " " ++ show ih ++ "\n255\n" -- Print header

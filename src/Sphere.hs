@@ -1,10 +1,9 @@
-{-# LANGUAGE InstanceSigs #-}
 module Sphere where
 import Hittable
 import Vec3
 import Ray (Ray(..), at)
 import Interval (contains, Interval)
-import Utils (SomeMaterial, HitRecord)
+import Utils (SomeMaterial)
 
 --Sphere hit logic
 --Derivation is in the book Ray Tracing in One Weekend
@@ -12,7 +11,7 @@ import Utils (SomeMaterial, HitRecord)
 discriminant :: Double -> Double -> Double -> Double
 discriminant a h c = h * h - a * c
 
--- quadratic formula variables
+-- quadratic formula variables --
 aVar :: Ray -> Double
 aVar r = vecLengthSquared (direction r)
 
@@ -21,10 +20,12 @@ hVar r c = dotProduct (direction r) (oToC r c)
 
 cVar :: Vec3 -> Double -> Double
 cVar oc rad = vecLengthSquared oc - (rad * rad)
+
 -- ray-origin-to-center-of-sphere vector
 oToC :: Ray -> Point3 -> Vec3
 oToC r c = c - origin r
 
+-- discriminatnt formula parametrized with sphere center, radius, and ray intersecting it
 discriminantCRadR :: Point3 -> Double -> Ray -> Double
 discriminantCRadR c rad r = discriminant (aVar r) 
                                  (hVar r c)
@@ -51,14 +52,12 @@ validRoot (Sphere c rad _) r intval
         plusR = (h + sqrt disc) / a
         minusR = (h - sqrt disc) / a
         
-
-
-
+-- Normal vector computed given a point, the center of the sphere, and the radius of the sphere
 normalVec :: Point3 -> Point3 -> Double -> Vec3
 normalVec p3 c = scaleDown (p3 - c)
 
+-- Make the sphere an instance of the Hittable typeclass
 instance Hittable Sphere where
-    hit :: Sphere -> Ray -> Interval -> Maybe HitRecord
     hit (Sphere c rad mat) r intval = 
         if discriminantCRadR c rad r
             < 0 

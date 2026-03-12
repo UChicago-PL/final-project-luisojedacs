@@ -1,0 +1,14 @@
+Report--Ray Tracing in One Weekend, Haskell Adaptation
+
+My implementation for this project reached the "Medium" stage of my proposal.
+I implemented ray tracing for Diffuse Materials, Dielectrics, and Metals. I also included a command-line interface to generate particular scenes.
+My code is structured and based on the work in the book Ray Tracing in One Weekend, whose code was originally in C++.
+I found it enjoyable and, at times, quite challenging to interpret certain C++ paradigms into a Haskell context.
+I would say the most notable example of this was in shared pointers, where instead I used an existential type to wrap different potential datatypes.
+I also found it interesting how I had to thread StdGens across different functions, always being careful to return a new one if I applied a random function within a random function.
+That is to say, I had to store and return the StdGen returned by random functions called within random functions because otherwise, the value returned would be stale.
+
+My code is organized such that the file names more or less correspond to what aspect of the implementation they pertain to.
+A notable exception to this is Utils, where at least one major typeclass (Material) is defined--this decision was made to avoid circular dependencies.
+The code in RayTracing.hs relies on all of the other files to create a raytraced PPM image.
+Thus, to try the project, run RayTracing.hs with --scene <demo, glass-demo, or metals>.
